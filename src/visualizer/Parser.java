@@ -83,7 +83,7 @@ public class Parser {
         double totalPixels = textBytes.length / BYTES_PER_PIXEL;
         int imageSize = (int) Math.sqrt(totalPixels); //find dimensions of image, rounding down
         int pixelsLost = (int) (totalPixels - (imageSize * imageSize));
-        
+        System.out.println(imageSize);
         
         metaData.addAll(transformAndPadHex(imageSize, 4)); //width of the image
         metaData.addAll(transformAndPadHex(imageSize, 4)); //height of the image
@@ -93,8 +93,8 @@ public class Parser {
         
         metaData.add(textBytes.length + ""); //size of Raw bitmap data.
         
-        metaData.addAll(transformAndPadHex(2835, 4));
-        metaData.addAll(transformAndPadHex(2835, 4));
+        metaData.addAll(padHex("130B", 4));
+        metaData.addAll(padHex("130B", 4));
         metaData.addAll(emptyBytes(4)); // number of colors in pallet
         metaData.addAll(emptyBytes(4)); // 0 means all colors are important
         
@@ -126,19 +126,27 @@ public class Parser {
      * @param requiredHexLength
      * @return String of appropriate length representing the hex value
      * 
-     * Unused Method???
+     * Being used to set pixel resolution.
+     * 
+     * 
      */
-    public String padHex(String hexString, int requiredHexLength)
+    public LinkedList<String> padHex(String hexString, int requiredHexLength)
     {
+    	LinkedList<String> temp = new LinkedList<String>();
     	if(hexString.length() == 1)
-    		hexString += "NULL";
-        while((hexString.length() * 2) < requiredHexLength)
-        {
-            hexString = hexString + "NULL";
-        }
-        System.out.println("padhex: " + hexString);
-
-        return hexString;
+    	{
+    		hexString += NULL_CHARACTER;
+    	}
+    	while ( ! hexString.isEmpty())
+    	{
+    		    temp.add("" +hexString.charAt(0) + hexString.charAt(1));
+    		    hexString = hexString.substring(2);
+    	}
+    	while(temp.size() < requiredHexLength)
+    	{
+    		temp.add("NULL");
+    	}
+    	return temp;
     }
 
     
@@ -153,7 +161,7 @@ public class Parser {
     	LinkedList<String> temp = new LinkedList<String>();
     	while(bytesNeeded > 0)
     	{
-    		temp.add("NULLNULL");
+    		temp.add("NULL");
     		bytesNeeded--;
     	}
     	return temp;
@@ -171,7 +179,7 @@ public class Parser {
     	
     	String hexString = Integer.toHexString(input);
     	if(hexString.length() == 1)
-        	hexString = "NULL" + hexString;
+        	hexString = NULL_CHARACTER + hexString;
     	
         temp.add(hexString);
         
@@ -248,14 +256,15 @@ public class Parser {
 		
 		par.readBmpFile();
 		
+	//	/**
 	    File file = new File("testData/pixelTest.txt");
 	    //TextFile text = new TextFile(file);
 
-		//par.createBmpByteArrayFromText(new TextFile(file));
-		//par.write(par.modifiedData, "testImage4.bmp");
+		par.createBmpByteArrayFromText(new TextFile(file));
+		par.write(par.modifiedData, "testImage5.bmp");
+	//	**/
 		
-		System.out.println(par.transformAndPadHex(2835, 4));
-		
+		System.out.println(par.transformAndPadHex(2, 4));
 		
 		//String s = "" + Parser.NULL_CHARACTER + Parser.NULL_CHARACTER;
 		//System.out.println();
