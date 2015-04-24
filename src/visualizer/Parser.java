@@ -11,6 +11,17 @@ public class Parser {
     private static final int DIB_HEADER_SIZE = 40;
     private static final int BYTES_PER_PIXEL = 3;
     private static final char NULL_CHARACTER = '\0';
+    private static final Byte[] byteLiteral =
+    	{0b00000000,
+    	 0b00000001,
+    	 0b00000010,
+    	 0b00000011,
+    	 0b00000100,
+    	 0b00000101,
+    	 0b00000110,
+    	 0b00000111,
+    	 0b00001000,
+    	 0b00001001 };
 
 	Path path;
 	byte[] dataRead;
@@ -63,17 +74,19 @@ public class Parser {
         modifiedData = new byte[modifiedLength]; //generate new array to have space for BMP/DIB metadata
         
 
-        //Generate BMP Header metadata
+        
         StringBuilder sb = new StringBuilder();
         LinkedList<String> metaData = new LinkedList<String>();
         //Each node of the list will represent a hexPair
         
-
+        
+        
+        //Generate BMP Header metadata
         metaData.add("42");									   //magic number for BMP files
         metaData.add("4D");
         metaData.addAll(transformAndPadHex(modifiedLength, 4));//string representing length of new file in hex
-        metaData.addAll(emptyBytes(2));		//unused field
-        metaData.addAll(emptyBytes(2));		//unused field
+        metaData.addAll(emptyBytes(2));						  //unused field
+        metaData.addAll(emptyBytes(2));						  //unused field
         metaData.addAll(transformAndPadHex(BMP_HEADER_SIZE + DIB_HEADER_SIZE, 4)); //offset of the pixel array
         
         
@@ -81,33 +94,34 @@ public class Parser {
         metaData.addAll(transformAndPadHex(DIB_HEADER_SIZE, 4)); //DIB header size
         //Calculate the size of the image
         double totalPixels = textBytes.length / BYTES_PER_PIXEL;
-        int imageSize = (int) Math.sqrt(totalPixels); //find dimensions of image, rounding down
+        int imageSize = (int) Math.sqrt(totalPixels);	    //find dimensions of image, rounding down
+        
+        //TODO Implement pixels lost
         int pixelsLost = (int) (totalPixels - (imageSize * imageSize));
-        System.out.println(imageSize);
         
         metaData.addAll(transformAndPadHex(imageSize, 4)); //width of the image
         metaData.addAll(transformAndPadHex(imageSize, 4)); //height of the image
         
-        metaData.addAll(transformAndPadHex(1,  2)); //color Planes Used
+        metaData.addAll(transformAndPadHex(1,  2));		   //color Planes Used
         metaData.addAll(transformAndPadHex((BYTES_PER_PIXEL * 8 ), 2)); //bits per pixel
-        
-        metaData.add(textBytes.length + ""); //size of Raw bitmap data.
+        metaData.addAll(emptyBytes(4));					  //No Pixel Array Compression
+        metaData.addAll(transformAndPadHex(textBytes.length, 4)); //size of Raw bitmap data.
         
         metaData.addAll(padHex("130B", 4));
         metaData.addAll(padHex("130B", 4));
-        metaData.addAll(emptyBytes(4)); // number of colors in pallet
-        metaData.addAll(emptyBytes(4)); // 0 means all colors are important
+        metaData.addAll(emptyBytes(4)); 				  // number of colors in pallet
+        metaData.addAll(emptyBytes(4)); 				  // 0 means all colors are important
         
         
-       // modifiedData = parseLinkedList(metaData);
+        //System.out.println(metaData.size());
+        byte[] tempMetaData = parseLinkedList(metaData);
         
-        byte[] temp = parseLinkedList(metaData);
-        modifiedData = new byte[temp.length + textBytes.length];
+        modifiedData = new byte[tempMetaData.length + textBytes.length];
         
         int index = 0;
-        while(index < temp.length)
+        while(index < tempMetaData.length)
         {
-        	modifiedData[index] = temp[index];
+        	modifiedData[index] = tempMetaData[index];
         	index++;
         }
         int index2 = 0;
@@ -135,7 +149,7 @@ public class Parser {
     	LinkedList<String> temp = new LinkedList<String>();
     	if(hexString.length() == 1)
     	{
-    		hexString += NULL_CHARACTER;
+    		hexString = 'Z' + hexString;
     	}
     	while ( ! hexString.isEmpty())
     	{
@@ -151,8 +165,6 @@ public class Parser {
 
     
     /**
-     * Generates byte string using String Builder.
-     * probably inefficient for strings smaller than 4.
      * @param numberOfBytes as hex
      * @return '00' for each byte requested
      */
@@ -179,7 +191,7 @@ public class Parser {
     	
     	String hexString = Integer.toHexString(input);
     	if(hexString.length() == 1)
-        	hexString = NULL_CHARACTER + hexString;
+        	hexString = 'Z' + hexString;
     	
         temp.add(hexString);
         
@@ -193,23 +205,24 @@ public class Parser {
      
     public byte[] parseLinkedList(LinkedList<String> list)
     {
-    	byte[] temp = new byte[list.size() * 2];
+    	byte[] temp = new byte[list.size()];
     	int index = 0;
     	while(list.peek() != null)
     	{
     		String s = list.poll();
     		if(s.contains("NULL"))
-    			temp[index] = (byte) 0b00000000;
+    			temp[index] = (byte) byteLiteral[0];
     		else
-    			temp[index] = Byte.decode("#" + s);
+    			if(s.contains("Z"))
+    				temp[index] = byteLiteral[Integer.parseInt(s.charAt(1) +"")];
+    				else
+    					temp[index] = Byte.decode("#" + s);
     		
     		index++;
     	}
     	return temp;
     }
-    
-    
-    
+      
 
     public void write(byte[] input, String outputFileName){
         //writing binary file.
@@ -256,15 +269,16 @@ public class Parser {
 		
 		par.readBmpFile();
 		
-	//	/**
+		// /**
 	    File file = new File("testData/pixelTest.txt");
 	    //TextFile text = new TextFile(file);
 
 		par.createBmpByteArrayFromText(new TextFile(file));
 		par.write(par.modifiedData, "testImage5.bmp");
-	//	**/
+		// **/
 		
-		System.out.println(par.transformAndPadHex(2, 4));
+		//String s = "16";
+		//System.out.println(Integer.toHexString(16));
 		
 		//String s = "" + Parser.NULL_CHARACTER + Parser.NULL_CHARACTER;
 		//System.out.println();
