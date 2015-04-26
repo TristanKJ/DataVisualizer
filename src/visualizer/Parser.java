@@ -269,16 +269,23 @@ public class Parser {
 		
 		par.readBmpFile();
 		
-		// /**
-	    File file = new File("testData/pixelTest.txt");
+		 /**
+	    File file = new File("testData/sampleText.txt");
 	    //TextFile text = new TextFile(file);
 
 		par.createBmpByteArrayFromText(new TextFile(file));
-		par.write(par.modifiedData, "testImage5.bmp");
-		// **/
+		par.write(par.modifiedData, "FullTextTest1.bmp");
+		 **/
 		
-		//String s = "16";
-		//System.out.println(Integer.toHexString(16));
+		
+		
+		
+		byte[] b = ExtendedByte.convertToBytes(500);
+		for(byte m : b)
+		{
+			System.out.print(m + " ");
+		}
+		
 		
 		//String s = "" + Parser.NULL_CHARACTER + Parser.NULL_CHARACTER;
 		//System.out.println();
