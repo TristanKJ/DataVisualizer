@@ -26,17 +26,17 @@ public class Parser {
 	Path path;
 	byte[] dataRead;
     byte[] modifiedData;
+    ExtendedByte eb = new ExtendedByte();
 	
 	public Parser()
 	{
 		//System.out.println(System.getProperty("user.dir"));
 	}
 	
-	public void readBmpFile()
+	public void readBmpFile(String filePath)
 	{
 		try{
-			//path = Paths.get("testData/blue.png");
-			path = Paths.get("testData/test1.bmp");
+			path = Paths.get(filePath);
 			dataRead = Files.readAllBytes(path);
 		}
 		catch(IOException e)
@@ -71,27 +71,19 @@ public class Parser {
         byte[] textBytes = text.getTextData();
 
         int modifiedLength = textBytes.length + BMP_HEADER_SIZE + DIB_HEADER_SIZE;
-        modifiedData = new byte[modifiedLength]; //generate new array to have space for BMP/DIB metadata
-        
-
-        
-        StringBuilder sb = new StringBuilder();
-        LinkedList<String> metaData = new LinkedList<String>();
-        //Each node of the list will represent a hexPair
-        
+        LinkedList<ExtendedByte> metaData = new LinkedList<ExtendedByte>();      
         
         
         //Generate BMP Header metadata
-        metaData.add("42");									   //magic number for BMP files
-        metaData.add("4D");
-        metaData.addAll(transformAndPadHex(modifiedLength, 4));//string representing length of new file in hex
-        metaData.addAll(emptyBytes(2));						  //unused field
-        metaData.addAll(emptyBytes(2));						  //unused field
-        metaData.addAll(transformAndPadHex(BMP_HEADER_SIZE + DIB_HEADER_SIZE, 4)); //offset of the pixel array
+        metaData.add(new ExtendedByte(16973, 2));  //magic number for BMP files
+        metaData.add(new ExtendedByte(modifiedLength, 4));//string representing length of new file in hex
+        metaData.add(new ExtendedByte(2));				  //unused field
+        metaData.add(new ExtendedByte(2));						  //unused field
+        metaData.add(new ExtendedByte(BMP_HEADER_SIZE + DIB_HEADER_SIZE, 4)); //offset of the pixel array
         
         
         //Generate DIBHeaderMetadata
-        metaData.addAll(transformAndPadHex(DIB_HEADER_SIZE, 4)); //DIB header size
+        metaData.add(new ExtendedByte(DIB_HEADER_SIZE, 4)); //DIB header size
         //Calculate the size of the image
         double totalPixels = textBytes.length / BYTES_PER_PIXEL;
         int imageSize = (int) Math.sqrt(totalPixels);	    //find dimensions of image, rounding down
@@ -99,22 +91,22 @@ public class Parser {
         //TODO Implement pixels lost
         int pixelsLost = (int) (totalPixels - (imageSize * imageSize));
         
-        metaData.addAll(transformAndPadHex(imageSize, 4)); //width of the image
-        metaData.addAll(transformAndPadHex(imageSize, 4)); //height of the image
+        metaData.add(new ExtendedByte(imageSize, 4)); //width of the image
+        metaData.add(new ExtendedByte(imageSize, 4)); //height of the image
         
-        metaData.addAll(transformAndPadHex(1,  2));		   //color Planes Used
-        metaData.addAll(transformAndPadHex((BYTES_PER_PIXEL * 8 ), 2)); //bits per pixel
-        metaData.addAll(emptyBytes(4));					  //No Pixel Array Compression
-        metaData.addAll(transformAndPadHex(textBytes.length, 4)); //size of Raw bitmap data.
+        metaData.add(new ExtendedByte(1,  2));		   //color Planes Used
+        metaData.add(new ExtendedByte((BYTES_PER_PIXEL * 8 ), 2)); //bits per pixel
+        metaData.add(new ExtendedByte(4));					  //No Pixel Array Compression
+        metaData.add(new ExtendedByte(textBytes.length, 4)); //size of Raw bitmap data.
         
-        metaData.addAll(padHex("130B", 4));
-        metaData.addAll(padHex("130B", 4));
-        metaData.addAll(emptyBytes(4)); 				  // number of colors in pallet
-        metaData.addAll(emptyBytes(4)); 				  // 0 means all colors are important
+        metaData.add(new ExtendedByte(2835, 4));
+        metaData.add(new ExtendedByte(2835, 4));
+        metaData.add(new ExtendedByte(4)); 				  // number of colors in pallet
+        metaData.add(new ExtendedByte(4));				  // 0 means all colors are important
         
         
         //System.out.println(metaData.size());
-        byte[] tempMetaData = parseLinkedList(metaData);
+        byte[] tempMetaData = eb.convertBMPMetadata(metaData);
         
         modifiedData = new byte[tempMetaData.length + textBytes.length];
         
@@ -130,7 +122,7 @@ public class Parser {
         	modifiedData[index] = textBytes[index2];
         	index++;
         	index2++;
-        }     
+        }
     }
 
     /**
@@ -267,30 +259,12 @@ public class Parser {
 		Parser par = new Parser();
 		
 		
-		par.readBmpFile();
+		TextFile text = new TextFile("testData/pixelTest.txt");
+		par.createBmpByteArrayFromText(text);
+		par.write(par.modifiedData, "FullTest1.bmp");
+	
 		
-		 /**
-	    File file = new File("testData/sampleText.txt");
-	    //TextFile text = new TextFile(file);
-
-		par.createBmpByteArrayFromText(new TextFile(file));
-		par.write(par.modifiedData, "FullTextTest1.bmp");
-		 **/
-		
-		
-		
-		
-		byte[] b = ExtendedByte.convertToBytes(500);
-		for(byte m : b)
-		{
-			System.out.print(m + " ");
-		}
-		
-		
-		//String s = "" + Parser.NULL_CHARACTER + Parser.NULL_CHARACTER;
-		//System.out.println();
-		
-		/**
+	 /**
 		Bitmap bmp = new Bitmap("testData/test1.bmp", par.getDataRead());
 		bmp.printHeaderData();
 		try{
@@ -299,7 +273,8 @@ public class Parser {
 		catch (Exception e)
 		{
 			System.exit(1);
-		}**/
+		}
+	 **/
 	}
 	
 }

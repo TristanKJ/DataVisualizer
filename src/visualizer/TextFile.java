@@ -29,7 +29,27 @@ public class TextFile implements SupportedType {
         catch (IOException e) {
             e.printStackTrace();
         }
-       // System.out.println(textData.length);
+    }
+    
+    public TextFile(String filePath)
+    {
+        BufferedReader reader = null;
+        try {
+        	File file = new File(filePath);
+            reader = new BufferedReader(new FileReader(file));
+            StringBuilder sb = new StringBuilder();
+
+            String line;
+            while((line = reader.readLine()) != null)
+            {
+                sb.append(line);
+            }
+            reader.close();
+            textData = Parser.StringToBytesASCII(sb.toString());
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 

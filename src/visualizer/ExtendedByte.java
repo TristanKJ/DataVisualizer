@@ -11,6 +11,7 @@
 
 package visualizer;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 
 public class ExtendedByte {
@@ -36,8 +37,6 @@ public class ExtendedByte {
 		data = new LinkedList<Byte>();
 	}
 	
-	
-	
 	/**
 	 * Initializes extended byte with value of input
 	 * and adds trailing zeros to match the requested Length
@@ -61,32 +60,116 @@ public class ExtendedByte {
 	 * Empty Bytes
 	 * Creates Extended Byte of specified size
 	 * Initialized to be zero.
-	 * @param bytesNeeded
+	 * @param emptyBytesNeeded
 	 */
-	public ExtendedByte(int bytesNeeded)
+	public ExtendedByte(int emptyBytesNeeded)
 	{
 		data = new LinkedList<Byte>();
 		
-		while(bytesNeeded > 0)	
+		while(emptyBytesNeeded > 0)	
 		{
 			data.add(byteLiteral[0]);
-			bytesNeeded--;
+			emptyBytesNeeded--;
 		}
 	}
 	
-
-	public Byte[] getData()
+	public ExtendedByte(String hexString, int totalBytesNeeded)
+	{
+		data = new LinkedList<Byte>();
+		while ( hexString.length() >= 2)
+    	{
+    		    data.add(Byte.decode("#" + hexString.charAt(0) + hexString.charAt(1)));
+    		    hexString = hexString.substring(2);
+    	}
+		while(data.size() < totalBytesNeeded)
+			data.add(byteLiteral[0]);
+	}
+	
+	public byte[] getData()
 	{
 		Byte[] temp = data.toArray(new Byte[0]);
+		return unboxByteArray(temp);
+	}
+	
+	public byte[] convertBMPMetadata(LinkedList<ExtendedByte> input)
+	{
+		int size = convertFromBytes(input.get(1).getData()); 				//extended byte holding file size
+		System.out.println(size);
+		ExtendedByte eb;
+		byte[] temp = new byte[size];
+		int index = 0;
+		while(input.peek() != null)
+		{
+			eb = input.poll();
+			while(eb.data.peek() != null)
+			{
+				temp[index] = eb.data.poll();
+				index++;
+			}
+		}
 		return temp;
 	}
 	
 	
 	public static byte[] convertToBytes(int input)
 	{
-		String hexString = Integer.toHexString(input);
-		return hexString.getBytes();
-		
+		String binary = Integer.toBinaryString(input);
+		System.out.println(binary);
+		byte[] temp = new byte[4];
+		int zerosMissing = Integer.numberOfLeadingZeros(input);
+		while(zerosMissing > 0)
+		{
+			binary = 0 + binary;
+			zerosMissing--;
+		}
+			
+		while(binary.length() < 32)
+			binary = binary + 0;
+		for(int i = 0; binary.length() > 0; i++)
+		{
+			Integer intValue = Integer.parseInt(binary.substring(0,8), 2);
+			temp[i] = intValue.byteValue();
+			binary = binary.substring(8);
+		}
+		return temp;
+	}
+	
+	public static int convertFromBytes(byte[] input)
+	{
+		try
+		{
+			return Integer.decode("#" + new String(input).trim());
+
+		}
+		catch(NumberFormatException e)
+		{
+			for(byte b : input)
+			{
+				System.out.println(b);
+			}
+			return 0;
+		}
+	}
+	
+	public String toString()
+	{
+		return "Decimal Value: " + convertFromBytes(getData());
+	}
+	
+	
+	/**
+	 * Because Java apparently isn't smart enough to figure this out.
+	 * @param input
+	 * @return A byte[] thats equivalent to the input
+	 */
+	private byte[] unboxByteArray(Byte[] input)
+	{
+		byte[] temp = new byte[input.length];
+		for(int i = 0; i < input.length; i++)
+		{
+			temp[i] = input[i].byteValue();
+		}
+		return temp;
 	}
 
 }
