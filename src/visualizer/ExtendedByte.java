@@ -94,7 +94,7 @@ public class ExtendedByte {
 	public byte[] convertBMPMetadata(LinkedList<ExtendedByte> input)
 	{
 		int size = convertFromBytes(input.get(1).getData()); 				//extended byte holding file size
-		System.out.println(size);
+		// System.out.println(size);
 		ExtendedByte eb;
 		byte[] temp = new byte[size];
 		int index = 0;
@@ -122,38 +122,65 @@ public class ExtendedByte {
 			binary = 0 + binary;
 			zerosMissing--;
 		}
-			
+		System.out.println(binary);
 		while(binary.length() < 32)
 			binary = binary + 0;
-		for(int i = 0; binary.length() > 0; i++)
+		
+		
+		int i = 0;
+		while(binary.length() > 0)
 		{
-			Integer intValue = Integer.parseInt(binary.substring(0,8), 2);
-			temp[i] = intValue.byteValue();
-			binary = binary.substring(8);
+				Integer intValue = Integer.parseInt(binary.substring(0,8), 2);
+				temp[i] = intValue.byteValue();
+				binary = binary.substring(8);
 		}
-		return temp;
+		byte[] tempFlipped = new byte[4];
+		int head = 0;
+		int tail = 3;
+		for(byte b : temp)
+		{
+			if(b == byteLiteral[0])
+			{
+				tempFlipped[tail] = b;
+				tail--;
+			}
+			else
+			{
+				tempFlipped[head] = b;
+				head++;
+			}
+		}
+		return tempFlipped;
 	}
 	
 	public static int convertFromBytes(byte[] input)
 	{
 		try
 		{
-			return Integer.decode("#" + new String(input).trim());
-
+			String s = "#" + new String(input);
+			System.out.println("convertFromBytes: " +  s);
+			return Integer.decode(s);
 		}
 		catch(NumberFormatException e)
 		{
+			
 			for(byte b : input)
 			{
 				System.out.println(b);
 			}
-			return 0;
+			//e.printStackTrace();
+			return -777;
 		}
 	}
 	
 	public String toString()
 	{
 		return "Decimal Value: " + convertFromBytes(getData());
+	}
+	
+	public void printArray(byte[] input)
+	{
+		System.out.println(Arrays.toString(input));
 	}
 	
 	
