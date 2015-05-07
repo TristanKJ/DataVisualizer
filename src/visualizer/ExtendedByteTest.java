@@ -10,8 +10,7 @@ public class ExtendedByteTest {
 	public void testHexToByteConversions() {
 		for(int i = 1; i < 5000; i++)
 		{
-			System.out.println("Testing: " + i);
-			assertEquals(i,ExtendedByte.convertFromBytes(ExtendedByte.convertToBytes(i)));
+			assertEquals(i, ExtendedByte.fromByteArray(ExtendedByte.toByteArray(i)));
 		}
 	}
 	
@@ -38,7 +37,10 @@ public class ExtendedByteTest {
 	{
 		ExtendedByte eb = new ExtendedByte(6461, 4);
 		byte[] byteLiteralOfInput = {0b00011001, 0b00111101, 0b00000000, 0b00000000};
-
+		
+		
+		System.out.println(eb.toString());
+		
 		assertArrayEquals(byteLiteralOfInput, eb.getData());
 	}
 	@Test

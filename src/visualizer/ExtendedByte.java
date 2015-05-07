@@ -11,7 +11,9 @@
 
 package visualizer;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 public class ExtendedByte {
@@ -31,6 +33,9 @@ public class ExtendedByte {
 	
 	public LinkedList<Byte> data;
 	
+	private int initialValue;
+	private String initialString;
+	
 	
 	public ExtendedByte()
 	{
@@ -46,8 +51,10 @@ public class ExtendedByte {
 	public ExtendedByte(int input, int requiredByteLength)
 	{
 		data = new LinkedList<Byte>();
+		initialValue = input;
 		
-		byte[] temp = convertToBytes(input);
+		byte[] temp = toByteArray(input);
+		System.out.println(Arrays.toString(temp));
 		for(byte b : temp)
 		{
 			data.add(b);
@@ -76,6 +83,7 @@ public class ExtendedByte {
 	public ExtendedByte(String hexString, int totalBytesNeeded)
 	{
 		data = new LinkedList<Byte>();
+		initialString = hexString + "";
 		while ( hexString.length() >= 2)
     	{
     		    data.add(Byte.decode("#" + hexString.charAt(0) + hexString.charAt(1)));
@@ -99,7 +107,7 @@ public class ExtendedByte {
 	
 	public byte[] convertBMPMetadata(LinkedList<ExtendedByte> input)
 	{
-		int size = convertFromBytes(input.get(1).getData()); 				//extended byte holding file size
+		int size = fromByteArray (input.get(1).getData()); 				//extended byte holding file size
 		// System.out.println(size);
 		ExtendedByte eb;
 		byte[] temp = new byte[size];
@@ -116,7 +124,17 @@ public class ExtendedByte {
 		return temp;
 	}
 	
+	public void setArrayListToLittleEndian()
+	{
+		Iterator it = data.iterator();
+		int size = data.size();
+		while(it.hasNext())
+		{
+			
+		}
+	}
 	
+	/**
 	public static byte[] convertToBytes(int input)
 	{
 		String binary = Integer.toBinaryString(input);
@@ -163,14 +181,15 @@ public class ExtendedByte {
 		}
 		return tempFlipped;
 	}
-	
+
 	public static int convertFromBytes(byte[] input)
 	{
 		try
 		{
 			String s = "#" + new String(input);
 			System.out.println("convertFromBytes: " +  s);
-			return Integer.decode(s);
+			return Integer.valueOf(s, 16);
+			//return Integer.decode(s);
 		}
 		catch(NumberFormatException e)
 		{
@@ -183,6 +202,7 @@ public class ExtendedByte {
 			return -777;
 		}
 	}
+	**/
 	
 	public String toString()
 	{
@@ -192,14 +212,13 @@ public class ExtendedByte {
 			sb.append(data.get(i) + " ");
 			i++;
 		}
-		
-		return "ArrayList Values: " + sb.toString();
-		//return "Decimal Value: " + convertFromBytes(getData());
+		printArray();
+		return "Decimal Value: " + fromByteArray(getData());
 	}
 	
-	public void printArray(byte[] input)
+	public void printArray()
 	{
-		System.out.println(Arrays.toString(input));
+		System.out.println("ArrayList Values: " + Arrays.toString(getData()));
 	}
 	
 	
@@ -217,5 +236,33 @@ public class ExtendedByte {
 		}
 		return temp;
 	}
+	
+	
+	
+	
+	
+	
+	public static byte[] toByteArray(int value) {
+	     return  ByteBuffer.allocate(4).putInt(value).array();
+	}
+
+	public static byte[] toByteArray2(int value) {
+	    return new byte[] {
+	        (byte) (value >> 24),
+	        (byte) (value >> 16),
+	        (byte) (value >> 8),
+	        (byte) value};
+	}
+
+	public static int fromByteArray(byte[] bytes) {
+	     return ByteBuffer.wrap(bytes).getInt();
+	}
+
+	public static int fromByteArray2(byte[] bytes) {
+	     return bytes[0] << 24 | (bytes[1] & 0xFF) << 16 | (bytes[2] & 0xFF) << 8 | (bytes[3] & 0xFF);
+	}
+	
+	
+	
 
 }

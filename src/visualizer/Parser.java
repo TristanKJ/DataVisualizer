@@ -262,7 +262,8 @@ public class Parser {
 		TextFile text = new TextFile("testData/pixelTest.txt");
 		par.createBmpByteArrayFromText(text);
 		par.write(par.modifiedData, "FullTest1.bmp");
-	
+
+		
 		
 	 /**
 		Bitmap bmp = new Bitmap("testData/test1.bmp", par.getDataRead());
