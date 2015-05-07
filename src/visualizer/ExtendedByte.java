@@ -87,7 +87,13 @@ public class ExtendedByte {
 	
 	public byte[] getData()
 	{
-		Byte[] temp = data.toArray(new Byte[0]);
+		Byte[] temp = new Byte[data.size()];
+		int index = 0;
+		while(index < temp.length)
+		{
+			temp[index] = data.get(index);
+			index++;
+		}
 		return unboxByteArray(temp);
 	}
 	
@@ -114,7 +120,7 @@ public class ExtendedByte {
 	public static byte[] convertToBytes(int input)
 	{
 		String binary = Integer.toBinaryString(input);
-		System.out.println(binary);
+		//System.out.println("convertToBytes() binary " + binary);
 		byte[] temp = new byte[4];
 		int zerosMissing = Integer.numberOfLeadingZeros(input);
 		while(zerosMissing > 0)
@@ -122,7 +128,7 @@ public class ExtendedByte {
 			binary = 0 + binary;
 			zerosMissing--;
 		}
-		System.out.println(binary);
+		//System.out.println(binary);
 		while(binary.length() < 32)
 			binary = binary + 0;
 		
@@ -133,20 +139,25 @@ public class ExtendedByte {
 				Integer intValue = Integer.parseInt(binary.substring(0,8), 2);
 				temp[i] = intValue.byteValue();
 				binary = binary.substring(8);
+				i++;
 		}
+		//Now flip the array so that empty bytes are at the end
 		byte[] tempFlipped = new byte[4];
-		int head = 0;
+		int head = 0; int index = 0;
 		int tail = 3;
-		for(byte b : temp)
+		
+		while(index < temp.length)
 		{
-			if(b == byteLiteral[0])
+			if(temp[index] == byteLiteral[0])
 			{
-				tempFlipped[tail] = b;
+				tempFlipped[tail] = byteLiteral[0];
+				index++;
 				tail--;
 			}
-			else
+			else	
 			{
-				tempFlipped[head] = b;
+				tempFlipped[head] = temp[index];
+				index++;
 				head++;
 			}
 		}
@@ -175,7 +186,15 @@ public class ExtendedByte {
 	
 	public String toString()
 	{
-		return "Decimal Value: " + convertFromBytes(getData());
+		StringBuilder sb = new StringBuilder();
+		int i = 0;
+		while(i < data.size()){
+			sb.append(data.get(i) + " ");
+			i++;
+		}
+		
+		return "ArrayList Values: " + sb.toString();
+		//return "Decimal Value: " + convertFromBytes(getData());
 	}
 	
 	public void printArray(byte[] input)
