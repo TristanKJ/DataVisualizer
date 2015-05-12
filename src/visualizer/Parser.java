@@ -75,7 +75,7 @@ public class Parser {
         
         
         //Generate BMP Header metadata
-        metaData.add(new ExtendedByte(16973, 2));  //magic number for BMP files
+        metaData.add(new ExtendedByte("424D", 2));  //magic number for BMP files
         metaData.add(new ExtendedByte(modifiedLength, 4));//string representing length of new file in hex
         metaData.add(new ExtendedByte(2));				  //unused field
         metaData.add(new ExtendedByte(2));						  //unused field
@@ -104,10 +104,12 @@ public class Parser {
         metaData.add(new ExtendedByte(4)); 				  // number of colors in pallet
         metaData.add(new ExtendedByte(4));				  // 0 means all colors are important
         
+        //System.out.println("metadata: " + metaData.size());
         
-        //System.out.println(metaData.size());
-        byte[] tempMetaData = eb.convertBMPMetadata(metaData);
+        byte[] tempMetaData = ExtendedByte.convertBMPMetadata(metaData);
         
+        //System.out.println("temp: " + tempMetaData.length + " textBytes: " + textBytes.length);
+
         modifiedData = new byte[tempMetaData.length + textBytes.length];
         
         int index = 0;

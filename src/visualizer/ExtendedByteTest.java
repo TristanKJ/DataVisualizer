@@ -5,7 +5,15 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class ExtendedByteTest {
-
+	
+	@Test
+	public void testByteLength2Fields()
+	{
+		ExtendedByte eb = new ExtendedByte(1, 2);
+		System.out.println(eb);
+		assertEquals(2, eb.data.size());
+	}
+	
 	@Test //Test that the same number that gets put in is what comes out.
 	public void testHexToByteConversions() {
 		for(int i = 1; i < 5000; i++)
@@ -26,9 +34,11 @@ public class ExtendedByteTest {
 	@Test
 	public void testDecimalToHexConversion()
 	{
-		ExtendedByte eb = new ExtendedByte(2835, 4);
-		byte[] byteLiteralOfInput = {0b00001011, 0b00010011, 0b00000000, 0b00000000};
-		
+		ExtendedByte eb = new ExtendedByte("130B", 2);
+		byte[] byteLiteralOfInput = {0b00001011, 0b00010011};
+		//byte[] byteLiteralOfInput = {0b00001011, 0b00010011, 0b00000000, 0b00000000};
+
+		System.out.println("2835: " + eb);
 		assertArrayEquals(byteLiteralOfInput, eb.getData());
 	}
 	

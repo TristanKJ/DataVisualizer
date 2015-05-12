@@ -18,7 +18,7 @@ import java.util.LinkedList;
 
 public class ExtendedByte {
 	
-	private static final char NULL_CHARACTER = '\0';
+	//private static final char NULL_CHARACTER = '\0';
 	private static final Byte[] byteLiteral = //byte literals for digits 0-9
     	{0b00000000,
     	 0b00000001,
@@ -54,13 +54,15 @@ public class ExtendedByte {
 		initialValue = input;
 		
 		byte[] temp = toByteArray(input);
-		System.out.println(Arrays.toString(temp));
 		for(byte b : temp)
 		{
-			data.add(b);
+			if(b != byteLiteral[0])
+				data.add(b);
 		}
 		while(data.size() < requiredByteLength)
 			data.add(byteLiteral[0]);
+		
+		arrayListToLittleEndian();
 	}
 	
 	/**
@@ -87,10 +89,14 @@ public class ExtendedByte {
 		while ( hexString.length() >= 2)
     	{
     		    data.add(Byte.decode("#" + hexString.charAt(0) + hexString.charAt(1)));
+    		    System.out.println("chars @ 0-1: " + hexString.charAt(0) + hexString.charAt(1));
     		    hexString = hexString.substring(2);
     	}
 		while(data.size() < totalBytesNeeded)
 			data.add(byteLiteral[0]);
+		
+		System.out.println(this);
+		arrayListToLittleEndian();
 	}
 	
 	public byte[] getData()
@@ -105,12 +111,12 @@ public class ExtendedByte {
 		return unboxByteArray(temp);
 	}
 	
-	public byte[] convertBMPMetadata(LinkedList<ExtendedByte> input)
+	public static byte[] convertBMPMetadata(LinkedList<ExtendedByte> input)
 	{
-		int size = fromByteArray (input.get(1).getData()); 				//extended byte holding file size
-		// System.out.println(size);
-		ExtendedByte eb;
+		int size = fromLittleEndianByteArray (input.get(1).getData()); 	//extended byte holding file size
 		byte[] temp = new byte[size];
+		
+		ExtendedByte eb;
 		int index = 0;
 		while(input.peek() != null)
 		{
@@ -124,85 +130,24 @@ public class ExtendedByte {
 		return temp;
 	}
 	
-	public void setArrayListToLittleEndian()
+	public void arrayListToLittleEndian()
 	{
-		Iterator it = data.iterator();
-		int size = data.size();
+		Iterator<Byte> it = data.iterator();
+		int startingSize = data.size();
 		while(it.hasNext())
 		{
-			
+			Byte b = it.next();
+			if(b.byteValue() == byteLiteral[0])
+			{
+				it.remove();
+			}
 		}
+		while(data.size() < startingSize)
+			data.add(byteLiteral[0]);
+
 	}
 	
-	/**
-	public static byte[] convertToBytes(int input)
-	{
-		String binary = Integer.toBinaryString(input);
-		//System.out.println("convertToBytes() binary " + binary);
-		byte[] temp = new byte[4];
-		int zerosMissing = Integer.numberOfLeadingZeros(input);
-		while(zerosMissing > 0)
-		{
-			binary = 0 + binary;
-			zerosMissing--;
-		}
-		//System.out.println(binary);
-		while(binary.length() < 32)
-			binary = binary + 0;
-		
-		
-		int i = 0;
-		while(binary.length() > 0)
-		{
-				Integer intValue = Integer.parseInt(binary.substring(0,8), 2);
-				temp[i] = intValue.byteValue();
-				binary = binary.substring(8);
-				i++;
-		}
-		//Now flip the array so that empty bytes are at the end
-		byte[] tempFlipped = new byte[4];
-		int head = 0; int index = 0;
-		int tail = 3;
-		
-		while(index < temp.length)
-		{
-			if(temp[index] == byteLiteral[0])
-			{
-				tempFlipped[tail] = byteLiteral[0];
-				index++;
-				tail--;
-			}
-			else	
-			{
-				tempFlipped[head] = temp[index];
-				index++;
-				head++;
-			}
-		}
-		return tempFlipped;
-	}
-
-	public static int convertFromBytes(byte[] input)
-	{
-		try
-		{
-			String s = "#" + new String(input);
-			System.out.println("convertFromBytes: " +  s);
-			return Integer.valueOf(s, 16);
-			//return Integer.decode(s);
-		}
-		catch(NumberFormatException e)
-		{
-			
-			for(byte b : input)
-			{
-				System.out.println(b);
-			}
-			//e.printStackTrace();
-			return -777;
-		}
-	}
-	**/
+	
 	
 	public String toString()
 	{
@@ -213,7 +158,7 @@ public class ExtendedByte {
 			i++;
 		}
 		printArray();
-		return "Decimal Value: " + fromByteArray(getData());
+		return "Decimal Value: " + fromLittleEndianByteArray(getData());
 	}
 	
 	public void printArray()
@@ -245,21 +190,42 @@ public class ExtendedByte {
 	public static byte[] toByteArray(int value) {
 	     return  ByteBuffer.allocate(4).putInt(value).array();
 	}
-
-	public static byte[] toByteArray2(int value) {
+/**
+	public static byte[] toLittleEndianByteArray(int value) { //untested Method
 	    return new byte[] {
-	        (byte) (value >> 24),
-	        (byte) (value >> 16),
 	        (byte) (value >> 8),
+	        (byte) (value >> 16),
+	        (byte) (value >> 24),
 	        (byte) value};
 	}
+	**/
 
 	public static int fromByteArray(byte[] bytes) {
+		if(bytes.length < 4)
+		{
+			byte[] temp = new byte[4];
+			Arrays.fill(temp, byteLiteral[0]);
+			for(int i = 3; i < bytes.length; i--)
+			{
+				temp[i] = bytes[i];
+			}
+			bytes = temp;
+		}
 	     return ByteBuffer.wrap(bytes).getInt();
 	}
 
-	public static int fromByteArray2(byte[] bytes) {
-	     return bytes[0] << 24 | (bytes[1] & 0xFF) << 16 | (bytes[2] & 0xFF) << 8 | (bytes[3] & 0xFF);
+	public static int fromLittleEndianByteArray(byte[] bytes) {
+		if(bytes.length < 4)
+		{
+			byte[] temp = new byte[4];
+			Arrays.fill(temp, byteLiteral[0]);
+			for(int i = 3; i < bytes.length; i--)
+			{
+				temp[i] = bytes[i];
+			}
+			bytes = temp;
+		}
+	     return bytes[3] << 24 | (bytes[2] & 0xFF) << 16 | (bytes[1] & 0xFF) << 8 | (bytes[0] & 0xFF);
 	}
 	
 	
