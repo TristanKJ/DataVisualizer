@@ -1,6 +1,9 @@
 package visualizer;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+
+import java.util.Arrays;
 
 import org.junit.Test;
 
@@ -34,16 +37,29 @@ public class ExtendedByteTest {
 	@Test
 	public void testDecimalToHexConversion()
 	{
-		ExtendedByte eb = new ExtendedByte("130B", 2);
-		byte[] byteLiteralOfInput = {0b00001011, 0b00010011};
-		//byte[] byteLiteralOfInput = {0b00001011, 0b00010011, 0b00000000, 0b00000000};
+		ExtendedByte eb = new ExtendedByte("130B", 4);
+		byte[] byteLiteralOfInput = {0b00010011, 0b00001011, 0b00000000, 0b00000000};
 
-		System.out.println("2835: " + eb);
+		assertArrayEquals(byteLiteralOfInput, eb.getData());
+	}
+	
+	
+	//@Test
+	public void testDecimalToHexConversion2() //windows calc returns B13
+	{
+		ExtendedByte eb = new ExtendedByte(2835, 2);
+		byte[] byteLiteralOfInput = {0b00010011, 0b00001011};
+		//byte[] byteLiteralOfInput = {0b00010011, 0b00001011, 0b00000000, 0b00000000};
+		
+		System.out.println("Literal: " + Arrays.toString(byteLiteralOfInput));
+		
+		System.out.println(eb.toString());
+
 		assertArrayEquals(byteLiteralOfInput, eb.getData());
 	}
 	
 	@Test
-	public void testDecimalToHexConversion2()
+	public void testDecimalToHexConversion3()
 	{
 		ExtendedByte eb = new ExtendedByte(6461, 4);
 		byte[] byteLiteralOfInput = {0b00011001, 0b00111101, 0b00000000, 0b00000000};
@@ -54,7 +70,7 @@ public class ExtendedByteTest {
 		assertArrayEquals(byteLiteralOfInput, eb.getData());
 	}
 	@Test
-	public void testDecimalToHexConversion3()
+	public void testDecimalToHexConversion4()
 	{
 		ExtendedByte eb = new ExtendedByte(538984961, 4);
 		byte[] byteLiteralOfInput = {0b00100000, 0b00100000, 0b01000010, 0b00000001};

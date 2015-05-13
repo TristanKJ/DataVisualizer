@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.LinkedList;
 
 public class Parser {
@@ -99,16 +100,16 @@ public class Parser {
         metaData.add(new ExtendedByte(4));					  //No Pixel Array Compression
         metaData.add(new ExtendedByte(textBytes.length, 4)); //size of Raw bitmap data.
         
-        metaData.add(new ExtendedByte(2835, 4));
-        metaData.add(new ExtendedByte(2835, 4));
+        metaData.add(new ExtendedByte("130B", 4));			//Print Resolution, Big Endian?
+        metaData.add(new ExtendedByte("130B", 4));
         metaData.add(new ExtendedByte(4)); 				  // number of colors in pallet
         metaData.add(new ExtendedByte(4));				  // 0 means all colors are important
         
-        //System.out.println("metadata: " + metaData.size());
+        System.out.println("metadata: " + metaData.size());
         
         byte[] tempMetaData = ExtendedByte.convertBMPMetadata(metaData);
         
-        //System.out.println("temp: " + tempMetaData.length + " textBytes: " + textBytes.length);
+        System.out.println("TextArray " + Arrays.toString(textBytes));
 
         modifiedData = new byte[tempMetaData.length + textBytes.length];
         
@@ -261,9 +262,9 @@ public class Parser {
 		Parser par = new Parser();
 		
 		
-		TextFile text = new TextFile("testData/pixelTest.txt");
+		TextFile text = new TextFile("testData/Vorgons.txt");
 		par.createBmpByteArrayFromText(text);
-		par.write(par.modifiedData, "FullTest1.bmp");
+		par.write(par.modifiedData, "largeTest1.bmp");
 
 		
 		

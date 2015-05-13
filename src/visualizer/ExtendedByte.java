@@ -75,10 +75,9 @@ public class ExtendedByte {
 	{
 		data = new LinkedList<Byte>();
 		
-		while(emptyBytesNeeded > 0)	
+		while(data.size() < emptyBytesNeeded)	
 		{
 			data.add(byteLiteral[0]);
-			emptyBytesNeeded--;
 		}
 	}
 	
@@ -89,13 +88,11 @@ public class ExtendedByte {
 		while ( hexString.length() >= 2)
     	{
     		    data.add(Byte.decode("#" + hexString.charAt(0) + hexString.charAt(1)));
-    		    System.out.println("chars @ 0-1: " + hexString.charAt(0) + hexString.charAt(1));
     		    hexString = hexString.substring(2);
     	}
 		while(data.size() < totalBytesNeeded)
 			data.add(byteLiteral[0]);
-		
-		System.out.println(this);
+				
 		arrayListToLittleEndian();
 	}
 	
@@ -113,7 +110,7 @@ public class ExtendedByte {
 	
 	public static byte[] convertBMPMetadata(LinkedList<ExtendedByte> input)
 	{
-		int size = fromLittleEndianByteArray (input.get(1).getData()); 	//extended byte holding file size
+		int size = fromLittleEndianByteArray (input.get(4).getData()); 	//extended byte holding file size
 		byte[] temp = new byte[size];
 		
 		ExtendedByte eb;
