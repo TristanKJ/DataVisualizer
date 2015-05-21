@@ -51,18 +51,6 @@ public class TextFile implements SupportedType {
             e.printStackTrace();
         }
     }
-
-
-
-    public void printHeaderData()
-    {
-
-    }
-	
-	public void printFileData()
-    {
-
-    }
 	
 	public String getMetaData()
     {
@@ -83,15 +71,15 @@ public class TextFile implements SupportedType {
         this.textData = textData;
     }
 
-    public static void main(String[] args)
-    {
-       File file = new File("testData/sampleText.txt");
-        TextFile text = new TextFile(file);
-        for(byte b : text.textData)
-        {
-            System.out.print(b + " ");
-        }
+	@Override
+	public void printHeaderData() {
+		// TODO Auto-generated method stub
+		
+	}
 
-    }
-
+	@Override
+	public void printFileData() {
+		// TODO Auto-generated method stub
+		
+	}
 }

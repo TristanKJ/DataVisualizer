@@ -18,23 +18,7 @@ import java.util.LinkedList;
 
 public class ExtendedByte {
 	
-	//private static final char NULL_CHARACTER = '\0';
-	private static final Byte[] byteLiteral = //byte literals for digits 0-9
-    	{0b00000000,
-    	 0b00000001,
-    	 0b00000010,
-    	 0b00000011,
-    	 0b00000100,
-    	 0b00000101,
-    	 0b00000110,
-    	 0b00000111,
-    	 0b00001000,
-    	 0b00001001 };
-	
 	public LinkedList<Byte> data;
-	
-	private int initialValue;
-	private String initialString;
 	
 	
 	public ExtendedByte()
@@ -51,16 +35,15 @@ public class ExtendedByte {
 	public ExtendedByte(int input, int requiredByteLength)
 	{
 		data = new LinkedList<Byte>();
-		initialValue = input;
 		
 		byte[] temp = toByteArray(input);
 		for(byte b : temp)
 		{
-			if(b != byteLiteral[0])
+			if(b != Constants.byteLiteral[0])
 				data.add(b);
 		}
 		while(data.size() < requiredByteLength)
-			data.add(byteLiteral[0]);
+			data.add(Constants.byteLiteral[0]);
 		
 		arrayListToLittleEndian();
 	}
@@ -77,21 +60,20 @@ public class ExtendedByte {
 		
 		while(data.size() < emptyBytesNeeded)	
 		{
-			data.add(byteLiteral[0]);
+			data.add(Constants.byteLiteral[0]);
 		}
 	}
 	
 	public ExtendedByte(String hexString, int totalBytesNeeded)
 	{
 		data = new LinkedList<Byte>();
-		initialString = hexString + "";
 		while ( hexString.length() >= 2)
     	{
     		    data.add(Byte.decode("#" + hexString.charAt(0) + hexString.charAt(1)));
     		    hexString = hexString.substring(2);
     	}
 		while(data.size() < totalBytesNeeded)
-			data.add(byteLiteral[0]);
+			data.add(Constants.byteLiteral[0]);
 				
 		arrayListToLittleEndian();
 	}
@@ -134,13 +116,13 @@ public class ExtendedByte {
 		while(it.hasNext())
 		{
 			Byte b = it.next();
-			if(b.byteValue() == byteLiteral[0])
+			if(b.byteValue() == Constants.byteLiteral[0])
 			{
 				it.remove();
 			}
 		}
 		while(data.size() < startingSize)
-			data.add(byteLiteral[0]);
+			data.add(Constants.byteLiteral[0]);
 
 	}
 	
@@ -179,29 +161,15 @@ public class ExtendedByte {
 		return temp;
 	}
 	
-	
-	
-	
-	
-	
 	public static byte[] toByteArray(int value) {
 	     return  ByteBuffer.allocate(4).putInt(value).array();
 	}
-/**
-	public static byte[] toLittleEndianByteArray(int value) { //untested Method
-	    return new byte[] {
-	        (byte) (value >> 8),
-	        (byte) (value >> 16),
-	        (byte) (value >> 24),
-	        (byte) value};
-	}
-	**/
 
 	public static int fromByteArray(byte[] bytes) {
 		if(bytes.length < 4)
 		{
 			byte[] temp = new byte[4];
-			Arrays.fill(temp, byteLiteral[0]);
+			Arrays.fill(temp, Constants.byteLiteral[0]);
 			for(int i = 3; i < bytes.length; i--)
 			{
 				temp[i] = bytes[i];
@@ -215,7 +183,7 @@ public class ExtendedByte {
 		if(bytes.length < 4)
 		{
 			byte[] temp = new byte[4];
-			Arrays.fill(temp, byteLiteral[0]);
+			Arrays.fill(temp, Constants.byteLiteral[0]);
 			for(int i = 3; i < bytes.length; i--)
 			{
 				temp[i] = bytes[i];

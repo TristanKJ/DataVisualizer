@@ -1,6 +1,10 @@
 package visualizer;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -8,25 +12,11 @@ import java.util.Arrays;
 import java.util.LinkedList;
 
 public class Parser {
-    private static final int BMP_HEADER_SIZE = 14;
-    private static final int DIB_HEADER_SIZE = 40;
-    private static final int BYTES_PER_PIXEL = 3;
-    private static final char NULL_CHARACTER = '\0';
-    private static final Byte[] byteLiteral =
-    	{0b00000000,
-    	 0b00000001,
-    	 0b00000010,
-    	 0b00000011,
-    	 0b00000100,
-    	 0b00000101,
-    	 0b00000110,
-    	 0b00000111,
-    	 0b00001000,
-    	 0b00001001 };
-
 	Path path;
+	byte[] textBytes;
 	byte[] dataRead;
     byte[] modifiedData;
+    LinkedList<ExtendedByte> metaData;
     ExtendedByte eb = new ExtendedByte();
 	
 	public Parser()
@@ -55,7 +45,7 @@ public class Parser {
     	else
     	{
     		b = new byte[str.length() + 1 ];
-    		b[str.length() + 1] = NULL_CHARACTER;
+    		b[str.length() + 1] = Constants.NULL_CHARACTER;
     	}
         for(int i = 0; i < str.length(); i++)
         {
@@ -64,50 +54,56 @@ public class Parser {
         return b;
     }
     
-    
-
-
-    public void createBmpByteArrayFromText(TextFile text)
+    public void CreateBmpFileFromData(TextFile textToBeConverted)
     {
-        byte[] textBytes = text.getTextData();
+    	createBmpHeader(textToBeConverted);
+    	createDibHeader();
+    	addTextDataToNewImage();
+    	
+    }
+    
+    private void createBmpHeader(TextFile textInput)
+    {
+        textBytes = textInput.getTextData();
 
-        int modifiedLength = textBytes.length + BMP_HEADER_SIZE + DIB_HEADER_SIZE;
-        LinkedList<ExtendedByte> metaData = new LinkedList<ExtendedByte>();      
-        
+        int modifiedLength = textBytes.length + Constants.BMP_HEADER_SIZE + Constants.DIB_HEADER_SIZE;
+        metaData = new LinkedList<ExtendedByte>();
         
         //Generate BMP Header metadata
         metaData.add(new ExtendedByte("424D", 2));  //magic number for BMP files
         metaData.add(new ExtendedByte(modifiedLength, 4));//string representing length of new file in hex
         metaData.add(new ExtendedByte(2));				  //unused field
         metaData.add(new ExtendedByte(2));						  //unused field
-        metaData.add(new ExtendedByte(BMP_HEADER_SIZE + DIB_HEADER_SIZE, 4)); //offset of the pixel array
-        
-        
-        //Generate DIBHeaderMetadata
-        metaData.add(new ExtendedByte(DIB_HEADER_SIZE, 4)); //DIB header size
+        metaData.add(new ExtendedByte(Constants.BMP_HEADER_SIZE + Constants.DIB_HEADER_SIZE, 4)); //offset of the pixel array
+    }
+    
+    public void createDibHeader()
+    {
+    	//Generate DIBHeaderMetadata
+        metaData.add(new ExtendedByte(Constants.DIB_HEADER_SIZE, 4)); //DIB header size
+
         //Calculate the size of the image
-        double totalPixels = textBytes.length / BYTES_PER_PIXEL;
+        double totalPixels = textBytes.length / Constants.BYTES_PER_PIXEL;
         int imageSize = (int) Math.sqrt(totalPixels);	    //find dimensions of image, rounding down
+        metaData.add(new ExtendedByte(imageSize, 4)); 		//width of the image
+        metaData.add(new ExtendedByte(imageSize, 4));	 //height of the image
         
-        //TODO Implement pixels lost
-        int pixelsLost = (int) (totalPixels - (imageSize * imageSize));
+        metaData.add(new ExtendedByte(1,  2));		   						//color Planes Used
+        metaData.add(new ExtendedByte((Constants.BYTES_PER_PIXEL * 8 ), 2)); //bits per pixel
+        metaData.add(new ExtendedByte(4));					  				//No Pixel Array Compression
+        metaData.add(new ExtendedByte(textBytes.length, 4)); 				//size of Raw bitmap data.
         
-        metaData.add(new ExtendedByte(imageSize, 4)); //width of the image
-        metaData.add(new ExtendedByte(imageSize, 4)); //height of the image
-        
-        metaData.add(new ExtendedByte(1,  2));		   //color Planes Used
-        metaData.add(new ExtendedByte((BYTES_PER_PIXEL * 8 ), 2)); //bits per pixel
-        metaData.add(new ExtendedByte(4));					  //No Pixel Array Compression
-        metaData.add(new ExtendedByte(textBytes.length, 4)); //size of Raw bitmap data.
-        
-        metaData.add(new ExtendedByte("130B", 4));			//Print Resolution, Big Endian?
-        metaData.add(new ExtendedByte("130B", 4));
+        //metaData.add(new ExtendedByte(2835, 4));
+        //metaData.add(new ExtendedByte(2835, 4));
+        metaData.add(new ExtendedByte("0B13", 4)); 			//Print Resolution, Big Endian?
+        metaData.add(new ExtendedByte("0B13", 4));
         metaData.add(new ExtendedByte(4)); 				  // number of colors in pallet
         metaData.add(new ExtendedByte(4));				  // 0 means all colors are important
-        
-        System.out.println("metadata: " + metaData.size());
-        
-        byte[] tempMetaData = ExtendedByte.convertBMPMetadata(metaData);
+    }
+    
+    public void addTextDataToNewImage()
+    {
+    	byte[] tempMetaData = ExtendedByte.convertBMPMetadata(metaData);
         
         System.out.println("TextArray " + Arrays.toString(textBytes));
 
@@ -128,6 +124,7 @@ public class Parser {
         }
     }
 
+
     /**
      * Add zeros to hex value strings to comply with the endianness.
      * hexString.length is divided by 2 to comply with the number of hex pairs needed.
@@ -139,6 +136,7 @@ public class Parser {
      * 
      * 
      */
+    @Deprecated
     public LinkedList<String> padHex(String hexString, int requiredHexLength)
     {
     	LinkedList<String> temp = new LinkedList<String>();
@@ -163,6 +161,7 @@ public class Parser {
      * @param numberOfBytes as hex
      * @return '00' for each byte requested
      */
+    @Deprecated
     public LinkedList<String> emptyBytes(int bytesNeeded)
     {
     	LinkedList<String> temp = new LinkedList<String>();
@@ -180,6 +179,7 @@ public class Parser {
      * @param requiredHexLength
      * @return
      */
+    @Deprecated
     public LinkedList<String> transformAndPadHex(int input, int requiredHexLength)
     {
     	LinkedList<String> temp = new LinkedList<String>();
@@ -197,7 +197,8 @@ public class Parser {
         
         return temp;
     }
-     
+    
+    @Deprecated
     public byte[] parseLinkedList(LinkedList<String> list)
     {
     	byte[] temp = new byte[list.size()];
@@ -206,10 +207,10 @@ public class Parser {
     	{
     		String s = list.poll();
     		if(s.contains("NULL"))
-    			temp[index] = (byte) byteLiteral[0];
+    			temp[index] = (byte) Constants.byteLiteral[0];
     		else
     			if(s.contains("Z"))
-    				temp[index] = byteLiteral[Integer.parseInt(s.charAt(1) +"")];
+    				temp[index] = Constants.byteLiteral[Integer.parseInt(s.charAt(1) +"")];
     				else
     					temp[index] = Byte.decode("#" + s);
     		
@@ -263,9 +264,8 @@ public class Parser {
 		
 		
 		TextFile text = new TextFile("testData/Vorgons.txt");
-		par.createBmpByteArrayFromText(text);
+		par.CreateBmpFileFromData(text);
 		par.write(par.modifiedData, "largeTest1.bmp");
-
 		
 		
 	 /**
