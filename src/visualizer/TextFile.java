@@ -1,3 +1,8 @@
+/**
+ * reads in the text file and generates the text data byte array.
+ * @author Tristan
+ */
+
 package visualizer;
 
 import java.io.BufferedReader;

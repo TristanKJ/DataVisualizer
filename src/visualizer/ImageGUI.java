@@ -1,3 +1,8 @@
+/**
+ * This class is intended for later when users will be able
+ * to recompile an image as they change the text. It currently is not
+ * being used.
+ */
 package visualizer;
 
 import java.awt.BorderLayout;

@@ -1,8 +1,13 @@
+/**
+ * This class is for when the ImageGUI is implemented.
+ * It is not currently in use.
+ */
+
 package visualizer;
 
 import java.util.Arrays;
 
-public class Bitmap implements SupportedType {
+public class Bitmap {
 	public String fileName;
 	public byte[] data;
 	public byte[] pixelArray;
@@ -49,11 +54,6 @@ public class Bitmap implements SupportedType {
 
 	public void printHeaderData() {
 		System.out.println(fileSize);
-		// System.out.println();
-	}
-
-	public void printFileData() {
-
 	}
 
 }

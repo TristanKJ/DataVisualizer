@@ -36,11 +36,16 @@ public class Parser {
 		return b;
 	}
 
-	public void CreateBmpFileFromData(TextFile textToBeConverted) {
+	
+	/**
+	 * Master method for creating and adding each part
+	 * of the bmp file to the list that holds the new file.
+	 * @param textToBeConverted
+	 */
+	public void createBmpFileFromData(TextFile textToBeConverted) {
 		createBmpHeader(textToBeConverted);
 		createDibHeader();
 		addTextDataToNewImage();
-
 	}
 
 	private void createBmpHeader(TextFile textInput) {
@@ -83,8 +88,8 @@ public class Parser {
 																// bitmap data.
 
 		metaData.add(new ExtendedByte(Constants.PRINT_RESOLUTION, 4)); // Print
-																		// Resolution
-		metaData.add(new ExtendedByte(Constants.PRINT_RESOLUTION, 4));
+		metaData.add(new ExtendedByte(Constants.PRINT_RESOLUTION, 4));// Resolution
+		
 		metaData.add(new ExtendedByte(4)); // number of colors in pallet
 		metaData.add(new ExtendedByte(4)); // 0 means all colors are important
 	}

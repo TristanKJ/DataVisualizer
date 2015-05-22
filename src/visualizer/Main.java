@@ -1,9 +1,11 @@
 /**
- * Main class Files created appear in the main folder, there are a variety of text
- * files in the testData folder.
+ * Main class Files created appear in the main folder,
+ * there are sample text files in the testData folder. 
+ * @author Tristan
  */
-package visualizer;
 
+
+package visualizer;
 
 public class Main {
 
@@ -15,7 +17,7 @@ public class Main {
 		Parser par = new Parser();
 
 		TextFile text = new TextFile(pathOfTextFile);
-		par.CreateBmpFileFromData(text);
+		par.createBmpFileFromData(text);
 		par.write(par.modifiedData, nameOfOutputFile);
 		
 		
