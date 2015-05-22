@@ -1,0 +1,12 @@
+.DS_Store
+.classpath
+.project
+bin
+gen
+gen-external-apklibs
+.swp
+out
+target
+.apk
+build
+.gradle
