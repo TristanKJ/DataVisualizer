@@ -1,1 +1,0 @@
-Cyclic redundancy checks may cause an issue here, its possible that it will be necessary for me to recalculate the 32-bit CRC code to keep the data from believing that it has been corrupted.
