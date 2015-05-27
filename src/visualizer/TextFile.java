@@ -26,7 +26,7 @@ public class TextFile {
 				sb.append(line);
 			}
 			reader.close();
-			textData = Parser.StringToBytesASCII(sb.toString());
+			textData = Parser.stringToBytesASCII(sb.toString());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

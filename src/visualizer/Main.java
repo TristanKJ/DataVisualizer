@@ -11,7 +11,9 @@ public class Main {
 
 	public static void main(String[] args) throws Exception {
 
-		String pathOfTextFile = "testData/Vorgons.txt";
+		
+		String pathOfTextFile = "testData/hg2g_fulltext.txt";
+
 		String nameOfOutputFile = "Output_" + System.currentTimeMillis() +".bmp";
 		
 		Parser par = new Parser();

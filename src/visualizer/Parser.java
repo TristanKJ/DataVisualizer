@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 
 public class Parser {
@@ -22,20 +23,16 @@ public class Parser {
 		// System.out.println(System.getProperty("user.dir"));
 	}
 
-	public static byte[] StringToBytesASCII(String str) {
-		byte[] b;
-		if ((str.length() % 2) == 0) {
-			b = new byte[str.length()];
-		} else {
-			b = new byte[str.length() + 1];
-			b[str.length() + 1] = Constants.NULL_CHARACTER;
-		}
-		for (int i = 0; i < str.length(); i++) {
-			b[i] = (byte) str.charAt(i);
-		}
+	
+	/**
+	 * Transforms a string into a byte array that has been encoded as ASCII
+	 * @param str Input to be transformed
+	 * @return byte array of str
+	 */
+	public static byte[] stringToBytesASCII(String str) {
+		byte[] b = str.getBytes(StandardCharsets.US_ASCII);
 		return b;
 	}
-
 	
 	/**
 	 * Master method for creating and adding each part
@@ -73,14 +70,14 @@ public class Parser {
 																		// size
 
 		// Calculate the size of the image
-		double totalPixels = textBytes.length / Constants.BYTES_PER_PIXEL;
+		double totalPixels = textBytes.length / Constants.BITS_PER_PIXEL;
 		int imageSize = (int) Math.sqrt(totalPixels); // find dimensions of
 														// image, rounding down
 		metaData.add(new ExtendedByte(imageSize, 4)); // width of the image
 		metaData.add(new ExtendedByte(imageSize, 4)); // height of the image
 
 		metaData.add(new ExtendedByte(1, 2)); // color Planes Used
-		metaData.add(new ExtendedByte((Constants.BYTES_PER_PIXEL * 8), 2)); // bits
+		metaData.add(new ExtendedByte((Constants.BITS_PER_PIXEL), 2)); // bits
 																			// per
 																			// pixel
 		metaData.add(new ExtendedByte(4)); // No Pixel Array Compression

@@ -1,7 +1,7 @@
 .DS_Store
 .classpath
 .project
-bin/
+bin
 gen
 gen-external-apklibs
 .swp
