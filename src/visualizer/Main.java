@@ -11,17 +11,22 @@ public class Main {
 
 	public static void main(String[] args) throws Exception {
 
+		if(!args[0] == null) {
 		
-		String pathOfTextFile = "testData/hg2g_fulltext.txt";
-
-		String nameOfOutputFile = "Output_" + System.currentTimeMillis() +".bmp";
+		String pathOfTextFile = "testData/" + args[0] + ".txt";
+		String nameOfOutputFile = "Output_" + args[0] +".bmp";
+		//String nameOfOutputFile = "Output_" + System.currentTimeMillis() +".bmp";
 		
 		Parser par = new Parser();
 
 		TextFile text = new TextFile(pathOfTextFile);
 		par.createBmpFileFromData(text);
 		par.write(par.modifiedData, nameOfOutputFile);
-		
+	}
+	else
+		System.out.println("please enter the name of the file as a parameter.")
+	
+	
 		
 		
 		//This version of Main uses arguments from command line
